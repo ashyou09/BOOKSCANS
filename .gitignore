@@ -31,3 +31,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# ignore large pdf files from git tracking (GitHub 100MB limit)
+public/pdfs/*.pdf
+!public/pdfs/README.md

@@ -264,30 +264,28 @@ export const PDFReader: React.FC<PDFReaderProps> = ({ book, onToggleSidebar }) =
         {/* Right Reader Controls */}
         <div className="flex items-center space-x-2">
           {isAdmin && (
-            <>
-              <button
-                onClick={() => setIsEditOpen(true)}
-                className="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-brand-600 text-white text-xs font-semibold flex items-center space-x-1 transition"
-                title="Edit Book Details & Chapters"
-              >
-                <Edit3 className="w-3.5 h-3.5" />
-                <span className="hidden md:inline">Edit Book</span>
-              </button>
-
-              <button
-                onClick={() => setIsNotesOpen(!isNotesOpen)}
-                className={`px-2.5 py-1 rounded-xl transition text-xs font-semibold flex items-center space-x-1.5 ${
-                  isNotesOpen
-                    ? 'bg-brand-600 text-white shadow-glow-purple'
-                    : 'bg-white/10 hover:bg-white/20 text-white'
-                }`}
-                title="Chapter Notes & Comments"
-              >
-                <MessageSquare className="w-3.5 h-3.5" />
-                <span className="hidden md:inline">Notes ({currentChapterNotes.length})</span>
-              </button>
-            </>
+            <button
+              onClick={() => setIsEditOpen(true)}
+              className="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-brand-600 text-white text-xs font-semibold flex items-center space-x-1 transition"
+              title="Edit Book Details & Chapters"
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              <span className="hidden md:inline">Edit Book</span>
+            </button>
           )}
+
+          <button
+            onClick={() => setIsNotesOpen(!isNotesOpen)}
+            className={`px-2.5 py-1 rounded-xl transition text-xs font-semibold flex items-center space-x-1.5 ${
+              isNotesOpen
+                ? 'bg-brand-600 text-white shadow-glow-purple'
+                : 'bg-white/10 hover:bg-white/20 text-white'
+            }`}
+            title="Chapter Notes & Comments"
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">Notes ({currentChapterNotes.length})</span>
+          </button>
 
           {/* Mode Switch: Webtoon vs Single */}
           <button
@@ -498,23 +496,29 @@ export const PDFReader: React.FC<PDFReaderProps> = ({ book, onToggleSidebar }) =
 
           {/* New Note Form */}
           <div className="p-3 border-t border-white/10 bg-black/40">
-            <div className="flex flex-col space-y-2">
-              <textarea
-                rows={2}
-                placeholder={`Add a note for Chapter ${currentChapterNumber}...`}
-                value={newNoteText}
-                onChange={(e) => setNewNoteText(e.target.value)}
-                className="w-full p-2.5 rounded-xl text-xs bg-white/10 border border-white/10 text-white placeholder-slate-400 outline-none focus:border-brand-500 transition resize-none"
-              />
-              <button
-                onClick={handleAddNote}
-                disabled={!newNoteText.trim()}
-                className="w-full py-2 rounded-xl bg-brand-600 hover:bg-brand-500 disabled:opacity-40 text-white text-xs font-bold flex items-center justify-center space-x-1.5 shadow-glow-purple transition"
-              >
-                <Send className="w-3.5 h-3.5" />
-                <span>Post Chapter Note</span>
-              </button>
-            </div>
+            {isAdmin ? (
+              <div className="flex flex-col space-y-2">
+                <textarea
+                  rows={2}
+                  placeholder={`Add a note for Chapter ${currentChapterNumber}...`}
+                  value={newNoteText}
+                  onChange={(e) => setNewNoteText(e.target.value)}
+                  className="w-full p-2.5 rounded-xl text-xs bg-white/10 border border-white/10 text-white placeholder-slate-400 outline-none focus:border-brand-500 transition resize-none"
+                />
+                <button
+                  onClick={handleAddNote}
+                  disabled={!newNoteText.trim()}
+                  className="w-full py-2 rounded-xl bg-brand-600 hover:bg-brand-500 disabled:opacity-40 text-white text-xs font-bold flex items-center justify-center space-x-1.5 shadow-glow-purple transition"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Post Chapter Note</span>
+                </button>
+              </div>
+            ) : (
+              <div className="p-3 text-center text-xs text-slate-400 font-medium bg-white/5 rounded-xl border border-white/10">
+                🔒 Reader View: Log in as Admin to post or edit chapter notes.
+              </div>
+            )}
           </div>
         </div>
       )}

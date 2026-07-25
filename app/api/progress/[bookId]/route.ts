@@ -1,56 +1,65 @@
 import { NextResponse } from 'next/server';
-import { PutCommand, GetCommand } from '@aws-sdk/lib-dynamodb';
-import { dynamo } from '@/lib/dynamo';
+import { connectToDatabase } from '@/lib/mongodb';
+import { ProgressModel } from '@/models/ProgressModel';
+
+export async function GET(
+  req: Request,
+  { params }: { params: { bookId: string } }
+) {
+  try {
+    const conn = await connectToDatabase();
+    if (conn) {
+      const progress = await ProgressModel.findOne({ bookId: params.bookId });
+      if (progress) {
+        return NextResponse.json({ success: true, progress });
+      }
+    }
+    return NextResponse.json({ success: false, message: 'Progress not found' });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
 
 export async function PUT(
   req: Request,
   { params }: { params: { bookId: string } }
 ) {
   try {
-    const { currentPage, currentChapter, dailyGoal } = await req.json();
+    const body = await req.json();
+    const { currentPage, currentChapter, dailyGoal } = body;
     const today = new Date().toISOString().split('T')[0];
 
-    const existing = await dynamo
-      .send(
-        new GetCommand({
-          TableName: 'Progress',
-          Key: { PK: 'USER#admin', SK: `BOOK#${params.bookId}` },
-        })
-      )
-      .catch(() => null);
+    const conn = await connectToDatabase();
+    if (conn) {
+      const existing = await ProgressModel.findOne({ bookId: params.bookId });
+      const isNewDay = existing?.sessionDate !== today;
+      const pagesReadToday = isNewDay ? 1 : (existing?.totalPagesReadToday || 0) + 1;
+      const goal = dailyGoal || existing?.dailyGoal || 15;
 
-    const prev = existing?.Item;
-    const isNewDay = prev?.sessionDate !== today;
-    const pagesReadToday = isNewDay
-      ? 1
-      : (prev?.totalPagesReadToday || 0) + 1;
+      const updated = await ProgressModel.findOneAndUpdate(
+        { bookId: params.bookId },
+        {
+          bookId: params.bookId,
+          currentPage: currentPage || 1,
+          currentChapter: currentChapter || 1,
+          lastReadAt: new Date().toISOString(),
+          totalPagesReadToday: pagesReadToday,
+          dailyGoal: goal,
+          goalReachedToday: pagesReadToday >= goal,
+          sessionDate: today,
+        },
+        { upsert: true, new: true }
+      );
 
-    const item = {
-      PK: 'USER#admin',
-      SK: `BOOK#${params.bookId}`,
-      currentPage,
-      currentChapter,
-      lastReadAt: new Date().toISOString(),
-      totalPagesReadToday: pagesReadToday,
-      dailyGoal: dailyGoal || prev?.dailyGoal || 15,
-      goalReachedToday: pagesReadToday >= (dailyGoal || prev?.dailyGoal || 15),
-      sessionDate: today,
-    };
+      return NextResponse.json({
+        success: true,
+        progress: updated,
+        pagesReadToday,
+        goalReached: pagesReadToday >= goal,
+      });
+    }
 
-    await dynamo
-      .send(
-        new PutCommand({
-          TableName: 'Progress',
-          Item: item,
-        })
-      )
-      .catch(() => null);
-
-    return NextResponse.json({
-      success: true,
-      pagesReadToday,
-      goalReached: pagesReadToday >= (dailyGoal || 15),
-    });
+    return NextResponse.json({ success: true, message: 'Updated locally' });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }

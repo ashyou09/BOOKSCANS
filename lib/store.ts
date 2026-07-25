@@ -59,15 +59,21 @@ export const useAppStore = create<AppState>()(
         })),
       setReaderTheme: (readerTheme) => set({ readerTheme }),
 
-      isAdmin: true, // Enabled for smooth admin usage out-of-the-box
+      isAdmin: false, // Default: Read-Only for visitors. Log in via Admin Login to unlock editing.
       loginAdmin: () => set({ isAdmin: true }),
       logoutAdmin: () => set({ isAdmin: false }),
 
       books: INITIAL_BOOKS,
-      addBook: (newBook) =>
+      addBook: (newBook) => {
         set((state) => ({
           books: [newBook, ...state.books],
-        })),
+        }));
+        fetch('/api/books', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newBook),
+        }).catch(() => null);
+      },
       updateBook: (updatedBook) =>
         set((state) => ({
           books: state.books.map((b) => (b.id === updatedBook.id ? updatedBook : b)),
@@ -94,7 +100,7 @@ export const useAppStore = create<AppState>()(
           bookId: 'book-1',
           currentPage: 36,
           currentChapter: 3,
-          lastReadAt: new Date().toISOString(),
+          lastReadAt: '2020-01-01T00:00:00.000Z',
           totalPagesReadToday: 8,
           dailyGoal: 15,
           goalReachedToday: false,
@@ -108,44 +114,47 @@ export const useAppStore = create<AppState>()(
         const today = getTodayString();
         const state = get();
         const existing = state.progressMap[bookId];
+
         const isNewDay = existing?.sessionDate !== today;
+        const currentToday = isNewDay ? 0 : existing?.totalPagesReadToday || 0;
+        const newToday = currentToday + pagesAdd;
+        const currentGoal = state.dailyStats.dailyGoal;
+        const goalReached = newToday >= currentGoal;
 
-        const newPagesRead = isNewDay
-          ? pagesAdd
-          : (existing?.totalPagesReadToday || 0) + pagesAdd;
-        const currentGoal = existing?.dailyGoal || state.dailyStats.dailyGoal;
+        fetch(`/api/progress/${bookId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ currentPage: page, currentChapter: chapter }),
+        }).catch(() => null);
 
-        const updatedProgress: ReadingProgress = {
-          bookId,
-          currentPage: page,
-          currentChapter: chapter,
-          lastReadAt: new Date().toISOString(),
-          totalPagesReadToday: newPagesRead,
-          dailyGoal: currentGoal,
-          goalReachedToday: newPagesRead >= currentGoal,
-          sessionDate: today,
-          readingMode: existing?.readingMode || 'webtoon',
-          readerTheme: existing?.readerTheme || 'midnight',
-        };
+        set((prevState) => {
+          const newMap = {
+            ...prevState.progressMap,
+            [bookId]: {
+              bookId,
+              currentPage: page,
+              currentChapter: chapter,
+              lastReadAt: new Date().toISOString(),
+              totalPagesReadToday: newToday,
+              dailyGoal: currentGoal,
+              goalReachedToday: goalReached,
+              sessionDate: today,
+              readingMode: existing?.readingMode || 'webtoon',
+              readerTheme: existing?.readerTheme || 'midnight',
+            },
+          };
 
-        // Update overall daily stats
-        const statsNewDay = state.dailyStats.sessionDate !== today;
-        const totalToday = statsNewDay
-          ? pagesAdd
-          : state.dailyStats.pagesReadToday + pagesAdd;
-
-        set((s) => ({
-          progressMap: { ...s.progressMap, [bookId]: updatedProgress },
-          dailyStats: {
-            ...s.dailyStats,
-            sessionDate: today,
-            pagesReadToday: totalToday,
-            streakDays:
-              statsNewDay && totalToday >= s.dailyStats.dailyGoal
-                ? s.dailyStats.streakDays + 1
-                : s.dailyStats.streakDays,
-          },
-        }));
+          return {
+            progressMap: newMap,
+            dailyStats: {
+              ...prevState.dailyStats,
+              pagesReadToday: prevState.dailyStats.sessionDate === today
+                ? prevState.dailyStats.pagesReadToday + pagesAdd
+                : pagesAdd,
+              sessionDate: today,
+            },
+          };
+        });
       },
 
       dailyStats: {
@@ -158,7 +167,10 @@ export const useAppStore = create<AppState>()(
 
       setDailyGoal: (dailyGoal) =>
         set((state) => ({
-          dailyStats: { ...state.dailyStats, dailyGoal },
+          dailyStats: {
+            ...state.dailyStats,
+            dailyGoal,
+          },
         })),
 
       checkAndResetDailyStats: () => {
@@ -196,19 +208,23 @@ export const useAppStore = create<AppState>()(
         })),
 
       chapterNotes: [],
-      addChapterNote: (bookId, chapterNumber, text) =>
+      addChapterNote: (bookId, chapterNumber, text) => {
+        const newNote = {
+          id: `note-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+          bookId,
+          chapterNumber,
+          text,
+          createdAt: new Date().toISOString(),
+        };
         set((state) => ({
-          chapterNotes: [
-            {
-              id: `note-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-              bookId,
-              chapterNumber,
-              text,
-              createdAt: new Date().toISOString(),
-            },
-            ...state.chapterNotes,
-          ],
-        })),
+          chapterNotes: [newNote, ...state.chapterNotes],
+        }));
+        fetch('/api/notes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bookId, chapterNumber, text }),
+        }).catch(() => null);
+      },
       deleteChapterNote: (id) =>
         set((state) => ({
           chapterNotes: state.chapterNotes.filter((n) => n.id !== id),

@@ -83,11 +83,26 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose }) => 
 
     if (pdfFile) {
       try {
+        // Save to public/pdfs/ folder so it gets saved to disk & committed to GitHub
+        const formData = new FormData();
+        formData.append('file', pdfFile);
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const uploadRes = await res.json();
+        if (uploadRes.success && uploadRes.url) {
+          savedPdfUrl = uploadRes.url;
+        }
+
+        // Cache in browser IndexedDB for zero-latency reading
         const arrayBuffer = await pdfFile.arrayBuffer();
         await savePdfData(bookId, arrayBuffer);
-        savedPdfUrl = URL.createObjectURL(pdfFile);
+        if (!savedPdfUrl) {
+          savedPdfUrl = URL.createObjectURL(pdfFile);
+        }
       } catch (err) {
-        console.error('Error saving PDF file to IndexedDB:', err);
+        console.error('Error saving PDF file:', err);
       }
     }
 

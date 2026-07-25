@@ -68,20 +68,22 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
                 </>
               )}
 
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  toggleBookmark(book.id);
-                }}
-                className={`p-1.5 rounded-xl backdrop-blur-md transition ${
-                  book.isBookmarked
-                    ? 'bg-amber-500 text-slate-950 shadow-glow-gold'
-                    : 'bg-slate-900/60 text-slate-300 hover:text-white'
-                }`}
-                title={book.isBookmarked ? 'Remove Bookmark' : 'Bookmark Title'}
-              >
-                <Bookmark className={`w-3.5 h-3.5 ${book.isBookmarked ? 'fill-current' : ''}`} />
-              </button>
+              {isAdmin && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    toggleBookmark(book.id);
+                  }}
+                  className={`p-1.5 rounded-xl backdrop-blur-md transition ${
+                    book.isBookmarked
+                      ? 'bg-amber-500 text-slate-950 shadow-glow-gold'
+                      : 'bg-slate-900/60 text-slate-300 hover:text-white'
+                  }`}
+                  title={book.isBookmarked ? 'Remove Bookmark' : 'Add Bookmark'}
+                >
+                  <Bookmark className="w-3.5 h-3.5 fill-current" />
+                </button>
+              )}
             </div>
           </div>
 
