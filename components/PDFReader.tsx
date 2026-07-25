@@ -208,13 +208,28 @@ export const PDFReader: React.FC<PDFReaderProps> = ({ book, onToggleSidebar }) =
     (_, i) => currentChapter.startPage + i
   );
 
+  const [showBars, setShowBars] = useState(true);
+  const lastScrollY = useRef(0);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const currentScrollY = e.currentTarget.scrollTop;
+    if (currentScrollY > lastScrollY.current + 10) {
+      setShowBars(false);
+    } else if (currentScrollY < lastScrollY.current - 10) {
+      setShowBars(true);
+    }
+    lastScrollY.current = currentScrollY;
+  };
+
   return (
     <div
       ref={containerRef}
-      className={`relative w-full min-h-screen flex flex-col transition-colors duration-300 ${getAtmosphereClass()}`}
+      className={`relative w-full h-full flex overflow-hidden transition-colors duration-300 ${getAtmosphereClass()}`}
     >
-      {/* AsuraScans Top Reader Sticky Toolbar */}
-      <header className="sticky top-0 z-30 w-full bg-black/60 backdrop-blur-md border-b border-white/10 px-4 py-2.5 flex items-center justify-between">
+      {/* Main Viewport Container */}
+      <div className="flex-1 flex flex-col relative min-w-0 h-full overflow-hidden bg-asura-bg">
+        {/* AsuraScans Top Reader Sticky Toolbar */}
+        <header className={`absolute top-0 left-0 right-0 z-30 w-full bg-black/60 backdrop-blur-md border-b border-white/10 px-4 py-2.5 flex items-center justify-between transition-transform duration-300 ${showBars ? 'translate-y-0' : '-translate-y-full'}`}>
         
         {/* Left Info & Chapter Toggle */}
         <div className="flex items-center space-x-3">
@@ -337,7 +352,12 @@ export const PDFReader: React.FC<PDFReaderProps> = ({ book, onToggleSidebar }) =
       </header>
 
       {/* Reader Viewport Engine */}
-      <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 flex flex-col items-center">
+      <main
+        className="flex-1 overflow-y-auto w-full flex flex-col items-center pt-16 pb-16"
+        onScroll={handleScroll}
+        onClick={() => setShowBars(!showBars)}
+      >
+        <div className="max-w-5xl w-full mx-auto p-4 sm:p-6 flex flex-col items-center">
         {readingMode === 'webtoon' ? (
           /* Continuous Vertical Webtoon Scroll Mode for Chapter Pages */
           <div className="w-full space-y-6">
@@ -418,10 +438,11 @@ export const PDFReader: React.FC<PDFReaderProps> = ({ book, onToggleSidebar }) =
             </div>
           </div>
         )}
+        </div>
       </main>
 
       {/* Reader Bottom Navigation Bar */}
-      <footer className="sticky bottom-0 z-30 w-full bg-black/70 backdrop-blur-md border-t border-white/10 px-4 py-3 flex items-center justify-between">
+      <footer className={`absolute bottom-0 left-0 right-0 z-30 w-full bg-black/70 backdrop-blur-md border-t border-white/10 px-4 py-3 flex items-center justify-between transition-transform duration-300 ${showBars ? 'translate-y-0' : 'translate-y-full'}`}>
         <div className="flex items-center space-x-3 w-full max-w-4xl mx-auto">
           <span className="text-xs font-semibold whitespace-nowrap text-white">
             Page {currentPage} / {book.totalPages}
@@ -442,10 +463,13 @@ export const PDFReader: React.FC<PDFReaderProps> = ({ book, onToggleSidebar }) =
 
       {/* Edit Book Modal */}
       <EditBookModal book={book} isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} />
+      </div>
 
       {/* Right Slide-Over Panel for Chapter Notes & Comments */}
       {isNotesOpen && (
-        <div className="fixed inset-y-0 right-0 z-40 w-80 sm:w-96 bg-slate-900/95 backdrop-blur-xl border-l border-white/10 shadow-2xl flex flex-col transition-all duration-300 animate-in slide-in-from-right">
+        <>
+        <div className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={() => setIsNotesOpen(false)} />
+        <div className="fixed lg:relative inset-y-0 right-0 z-50 lg:z-40 w-full sm:w-96 lg:w-96 bg-slate-900/95 backdrop-blur-xl border-l border-white/10 shadow-2xl flex flex-col flex-shrink-0 transition-transform animate-in slide-in-from-right h-full">
           <div className="p-4 border-b border-white/10 flex items-center justify-between">
             <div className="flex items-center space-x-2 text-white">
               <MessageSquare className="w-4 h-4 text-brand-400" />
@@ -521,6 +545,7 @@ export const PDFReader: React.FC<PDFReaderProps> = ({ book, onToggleSidebar }) =
             )}
           </div>
         </div>
+        </>
       )}
     </div>
   );

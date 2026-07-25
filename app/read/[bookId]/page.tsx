@@ -45,7 +45,7 @@ export default function ReaderPage() {
   };
 
   return (
-    <div className="relative min-h-screen w-full flex bg-asura-bg overflow-hidden">
+    <div className="relative h-screen w-full flex bg-asura-bg">
       
       {/* Collapsible Sidebar Drawer for Chapters */}
       <aside
@@ -80,7 +80,7 @@ export default function ReaderPage() {
       )}
 
       {/* Main Reader View */}
-      <div className="flex-1 w-full min-h-screen">
+      <div className="flex-1 w-full h-full">
         <PDFReader book={book} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       </div>
     </div>
