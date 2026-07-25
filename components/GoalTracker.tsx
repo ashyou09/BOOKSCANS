@@ -5,7 +5,7 @@ import { Flame, Target, Trophy, Edit2, Check, Sparkles } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 
 export const GoalTracker: React.FC = () => {
-  const { dailyStats, setDailyGoal } = useAppStore();
+  const { dailyStats, setDailyGoal, isAdmin } = useAppStore();
   const [isEditing, setIsEditing] = useState(false);
   const [goalInput, setGoalInput] = useState(dailyStats.dailyGoal);
 
@@ -51,30 +51,32 @@ export const GoalTracker: React.FC = () => {
           </span>
           <div className="flex items-center space-x-2">
             <span className="font-bold text-emerald-500">{percent}%</span>
-            {isEditing ? (
-              <div className="flex items-center space-x-1">
-                <input
-                  type="number"
-                  min={1}
-                  value={goalInput}
-                  onChange={(e) => setGoalInput(Number(e.target.value))}
-                  className="w-14 px-2 py-0.5 text-xs bg-slate-100 dark:bg-asura-bg border border-brand-500 rounded outline-none"
-                />
+            {isAdmin && (
+              isEditing ? (
+                <div className="flex items-center space-x-1">
+                  <input
+                    type="number"
+                    min={1}
+                    value={goalInput}
+                    onChange={(e) => setGoalInput(Number(e.target.value))}
+                    className="w-14 px-2 py-0.5 text-xs bg-slate-100 dark:bg-asura-bg border border-brand-500 rounded outline-none"
+                  />
+                  <button
+                    onClick={handleSaveGoal}
+                    className="p-1 bg-brand-500 text-white rounded hover:bg-brand-600"
+                  >
+                    <Check className="w-3 h-3" />
+                  </button>
+                </div>
+              ) : (
                 <button
-                  onClick={handleSaveGoal}
-                  className="p-1 bg-brand-500 text-white rounded hover:bg-brand-600"
+                  onClick={() => setIsEditing(true)}
+                  className="text-slate-400 hover:text-white p-1"
+                  title="Edit Target"
                 >
-                  <Check className="w-3 h-3" />
+                  <Edit2 className="w-3.5 h-3.5" />
                 </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="text-slate-400 hover:text-white p-1"
-                title="Edit Target"
-              >
-                <Edit2 className="w-3.5 h-3.5" />
-              </button>
+              )
             )}
           </div>
         </div>
