@@ -104,4 +104,5 @@ export interface AppState {
   chapterNotes: ChapterNote[];
   addChapterNote: (bookId: string, chapterNumber: number, text: string) => void;
   deleteChapterNote: (id: string) => void;
+  syncWithDatabase: () => Promise<void>;
 }

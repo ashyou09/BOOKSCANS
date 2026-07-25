@@ -10,11 +10,12 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { themeMode, checkAndResetDailyStats } = useAppStore();
+  const { themeMode, checkAndResetDailyStats, syncWithDatabase } = useAppStore();
 
   useEffect(() => {
     checkAndResetDailyStats();
-  }, [checkAndResetDailyStats]);
+    syncWithDatabase();
+  }, [checkAndResetDailyStats, syncWithDatabase]);
 
   useEffect(() => {
     const root = document.documentElement;

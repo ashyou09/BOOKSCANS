@@ -42,12 +42,23 @@ export const useAppStore = create<AppState>()(
           books: state.books.filter((b) => b.id !== id),
         }));
       },
-      toggleBookmark: (id) =>
-        set((state) => ({
-          books: state.books.map((b) =>
-            b.id === id ? { ...b, isBookmarked: !b.isBookmarked } : b
-          ),
-        })),
+      toggleBookmark: (id) => {
+        set((state) => {
+          const book = state.books.find(b => b.id === id);
+          if (book) {
+            fetch(`/api/books/${id}/bookmark`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ isBookmarked: !book.isBookmarked }),
+            }).catch(() => null);
+          }
+          return {
+            books: state.books.map((b) =>
+              b.id === id ? { ...b, isBookmarked: !b.isBookmarked } : b
+            ),
+          };
+        });
+      },
       updateBookStatus: (id, status) =>
         set((state) => ({
           books: state.books.map((b) => (b.id === id ? { ...b, status } : b)),
@@ -184,10 +195,80 @@ export const useAppStore = create<AppState>()(
           body: JSON.stringify({ bookId, chapterNumber, text }),
         }).catch(() => null);
       },
-      deleteChapterNote: (id) =>
+      deleteChapterNote: (id) => {
         set((state) => ({
           chapterNotes: state.chapterNotes.filter((n) => n.id !== id),
-        })),
+        }));
+        fetch(`/api/notes/${id}`, { method: 'DELETE' }).catch(() => null);
+      },
+
+      syncWithDatabase: async () => {
+        try {
+          const [booksRes, notesRes, progressRes] = await Promise.all([
+            fetch('/api/books').catch(() => null),
+            fetch('/api/notes').catch(() => null),
+            fetch('/api/progress').catch(() => null),
+          ]);
+          
+          if (booksRes && booksRes.ok) {
+            const dbBooks = await booksRes.json();
+            if (Array.isArray(dbBooks)) {
+              set({ books: dbBooks });
+            }
+          }
+          
+          if (notesRes && notesRes.ok) {
+            const data = await notesRes.json();
+            if (data.success && data.notes) {
+              set({ chapterNotes: data.notes });
+            }
+          }
+          
+          if (progressRes && progressRes.ok) {
+            const data = await progressRes.json();
+            if (data.success && data.progress) {
+              const newProgressMap: Record<string, ReadingProgress> = {};
+              let mostRecentDate = getTodayString();
+              let bestPagesToday = 0;
+              let currentGoal = 15;
+              
+              data.progress.forEach((p: any) => {
+                newProgressMap[p.bookId] = {
+                  bookId: p.bookId,
+                  currentPage: p.currentPage,
+                  currentChapter: p.currentChapter,
+                  lastReadAt: p.lastReadAt,
+                  totalPagesReadToday: p.totalPagesReadToday,
+                  dailyGoal: p.dailyGoal,
+                  goalReachedToday: p.goalReachedToday,
+                  sessionDate: p.sessionDate,
+                  readingMode: 'webtoon',
+                  readerTheme: 'midnight',
+                };
+                
+                // Try to infer daily stats from the most active book today
+                if (p.sessionDate === getTodayString() && p.totalPagesReadToday > bestPagesToday) {
+                  bestPagesToday = p.totalPagesReadToday;
+                  currentGoal = p.dailyGoal;
+                }
+              });
+              
+              set((state) => ({
+                progressMap: newProgressMap,
+                dailyStats: {
+                  ...state.dailyStats,
+                  sessionDate: getTodayString(),
+                  pagesReadToday: bestPagesToday,
+                  dailyGoal: currentGoal,
+                  goalReachedToday: bestPagesToday >= currentGoal,
+                }
+              }));
+            }
+          }
+        } catch (error) {
+          console.error("Failed to sync with database:", error);
+        }
+      },
     }),
     {
       name: 'bookscan-storage',
