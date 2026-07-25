@@ -340,6 +340,7 @@ export const PDFReader: React.FC<PDFReaderProps> = ({ book, onToggleSidebar }) =
 
       {/* Reader Viewport Engine */}
       <main
+        id="pdf-scroll-container"
         className="flex-1 overflow-y-auto w-full flex flex-col items-center pt-16 pb-16"
       >
         <div className="max-w-5xl w-full mx-auto p-4 sm:p-6 flex flex-col items-center">

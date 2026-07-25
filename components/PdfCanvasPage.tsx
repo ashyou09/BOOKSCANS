@@ -29,7 +29,10 @@ export const PdfCanvasPage: React.FC<PdfCanvasPageProps> = ({
           observer.disconnect();
         }
       },
-      { rootMargin: '800px' }
+      { 
+        root: document.getElementById('pdf-scroll-container') || null,
+        rootMargin: '1200px' 
+      }
     );
     if (containerRef.current) observer.observe(containerRef.current);
     return () => observer.disconnect();
@@ -76,9 +79,18 @@ export const PdfCanvasPage: React.FC<PdfCanvasPageProps> = ({
         const context = canvas.getContext('2d');
         if (!context) return;
 
-        const viewport = page.getViewport({ scale });
+        // Optimize memory for mobile devices
+        const isMobile = window.innerWidth < 768;
+        const finalScale = isMobile ? scale * 0.7 : scale;
+        
+        const viewport = page.getViewport({ scale: finalScale });
         canvas.height = viewport.height;
         canvas.width = viewport.width;
+        
+        if (isMobile) {
+          canvas.style.width = '100%';
+          canvas.style.height = 'auto';
+        }
 
         const renderContext = {
           canvasContext: context,
