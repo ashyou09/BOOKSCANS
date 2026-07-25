@@ -1,50 +1,8 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { Book, ReadingProgress, VideoResource, DailyStats, ChapterNote } from '@/types';
+import { AppState, Book, ReadingProgress, VideoResource, ChapterNote } from '@/types';
 import { INITIAL_BOOKS, INITIAL_VIDEOS } from './mockData';
 import { deletePdfData } from './pdfStorage';
-
-interface AppState {
-  // Theme & Atmosphere State
-  themeMode: 'dark' | 'light';
-  readerTheme: 'midnight' | 'sepia' | 'light' | 'oled';
-  toggleThemeMode: () => void;
-  setReaderTheme: (theme: 'midnight' | 'sepia' | 'light' | 'oled') => void;
-
-  // Admin Auth State
-  isAdmin: boolean;
-  loginAdmin: () => void;
-  logoutAdmin: () => void;
-
-  // Books State
-  books: Book[];
-  addBook: (newBook: Book) => void;
-  updateBook: (updatedBook: Book) => void;
-  deleteBook: (id: string) => void;
-  toggleBookmark: (id: string) => void;
-  updateBookStatus: (id: string, status: Book['status']) => void;
-
-  // Reading Progress State
-  progressMap: Record<string, ReadingProgress>;
-  updateProgress: (bookId: string, page: number, chapter: number, totalPagesReadTodayAdd?: number) => void;
-
-  // Daily Goal Stats State
-  dailyStats: DailyStats;
-  setDailyGoal: (goal: number) => void;
-  checkAndResetDailyStats: () => void;
-
-  // Videos State
-  videos: VideoResource[];
-  addVideo: (video: VideoResource) => void;
-  toggleVideoWatched: (id: string) => void;
-  updateVideoNotes: (id: string, notes: string) => void;
-  deleteVideo: (id: string) => void;
-
-  // Chapter Notes State
-  chapterNotes: ChapterNote[];
-  addChapterNote: (bookId: string, chapterNumber: number, text: string) => void;
-  deleteChapterNote: (id: string) => void;
-}
 
 const getTodayString = () => new Date().toISOString().split('T')[0];
 
@@ -96,12 +54,12 @@ export const useAppStore = create<AppState>()(
         })),
 
       progressMap: {
-        'book-1': {
-          bookId: 'book-1',
-          currentPage: 36,
-          currentChapter: 3,
-          lastReadAt: '2020-01-01T00:00:00.000Z',
-          totalPagesReadToday: 8,
+        'ml-vol-1': {
+          bookId: 'ml-vol-1',
+          currentPage: 1,
+          currentChapter: 1,
+          lastReadAt: new Date().toISOString(),
+          totalPagesReadToday: 0,
           dailyGoal: 15,
           goalReachedToday: false,
           sessionDate: getTodayString(),
@@ -159,10 +117,10 @@ export const useAppStore = create<AppState>()(
 
       dailyStats: {
         sessionDate: getTodayString(),
-        pagesReadToday: 8,
+        pagesReadToday: 0,
         dailyGoal: 15,
         streakDays: 5,
-        completedBooksCount: 2,
+        goalReachedToday: false,
       },
 
       setDailyGoal: (dailyGoal) =>
@@ -182,6 +140,7 @@ export const useAppStore = create<AppState>()(
               ...state.dailyStats,
               sessionDate: today,
               pagesReadToday: 0,
+              goalReachedToday: false,
             },
           });
         }
@@ -232,7 +191,15 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'bookscan-storage',
+      version: 5,
       storage: createJSONStorage(() => localStorage),
+      migrate: (persistedState: any, version: number) => {
+        // Automatically update books list to include newly added ML Volumes 1-4 and PDFs
+        return {
+          ...persistedState,
+          books: INITIAL_BOOKS,
+        };
+      },
     }
   )
 );

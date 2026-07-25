@@ -4,13 +4,14 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { BookOpen, Star, ArrowRight, Play, Clock, Layers, ChevronRight } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
+import { Book } from '@/types';
 
 export const HeroBanner: React.FC = () => {
   const { books, progressMap, dailyStats } = useAppStore();
 
   // Find all books that have reading progress, sorted by lastReadAt descending
   const recentReads = books
-    .map((book) => {
+    .map((book: Book) => {
       const progress = progressMap[book.id];
       return {
         book,
@@ -18,13 +19,13 @@ export const HeroBanner: React.FC = () => {
         lastReadAt: progress?.lastReadAt ? new Date(progress.lastReadAt).getTime() : 0,
       };
     })
-    .sort((a, b) => b.lastReadAt - a.lastReadAt);
+    .sort((a: any, b: any) => b.lastReadAt - a.lastReadAt);
 
   const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
 
   // Active featured book is either selected by user or the most recently read book
   const activeEntry =
-    recentReads.find((r) => r.book.id === selectedBookId) ||
+    recentReads.find((r: { book: Book; progress: any; lastReadAt: number }) => r.book.id === selectedBookId) ||
     recentReads[0] ||
     { book: books[0], progress: null, lastReadAt: 0 };
 
@@ -157,7 +158,7 @@ export const HeroBanner: React.FC = () => {
                 Recent Reads:
               </span>
               <div className="flex items-center space-x-2">
-                {recentReads.slice(0, 4).map(({ book }) => (
+                {recentReads.slice(0, 4).map(({ book }: { book: Book }) => (
                   <button
                     key={book.id}
                     onClick={() => setSelectedBookId(book.id)}

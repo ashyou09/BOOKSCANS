@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { BookCard } from '@/components/BookCard';
 import { UploadModal } from '@/components/UploadModal';
 import { useAppStore } from '@/lib/store';
+import { Book } from '@/types';
 import { Search, Filter, PlusCircle, Bookmark, BookOpen, ArrowUpDown } from 'lucide-react';
 
 function LibraryContent() {
@@ -36,7 +37,7 @@ function LibraryContent() {
   ];
 
   const filtered = books
-    .filter((b) => {
+    .filter((b: Book) => {
       const matchesCategory =
         selectedCategory === 'All'
           ? true
@@ -51,7 +52,7 @@ function LibraryContent() {
 
       return matchesCategory && matchesSearch;
     })
-    .sort((a, b) => {
+    .sort((a: Book, b: Book) => {
       if (sortBy === 'rating') return b.rating - a.rating;
       if (sortBy === 'title') return a.title.localeCompare(b.title);
       return new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime();
@@ -132,7 +133,7 @@ function LibraryContent() {
       {/* Grid of Filtered Books */}
       {filtered.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {filtered.map((book) => (
+          {filtered.map((book: Book) => (
             <BookCard key={book.id} book={book} />
           ))}
         </div>

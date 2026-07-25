@@ -6,16 +6,17 @@ import { HeroBanner } from '@/components/HeroBanner';
 import { BookCard } from '@/components/BookCard';
 import { GoalTracker } from '@/components/GoalTracker';
 import { useAppStore } from '@/lib/store';
+import { Book } from '@/types';
 import { Flame, Sparkles, BookOpen, Clock, Bookmark, ArrowRight, Grid } from 'lucide-react';
 
 export default function HomePage() {
   const { books, progressMap } = useAppStore();
   const [activeTab, setActiveTab] = useState<'all' | 'manhwa' | 'textbook' | 'bookmarked'>('all');
 
-  const bookmarkedBooks = books.filter((b) => b.isBookmarked);
-  const hotBooks = books.filter((b) => b.isHot);
+  const bookmarkedBooks = books.filter((b: Book) => b.isBookmarked);
+  const hotBooks = books.filter((b: Book) => b.isHot);
 
-  const filteredBooks = books.filter((b) => {
+  const filteredBooks = books.filter((b: Book) => {
     if (activeTab === 'manhwa') return b.category === 'Manhwa' || b.category === 'Manga';
     if (activeTab === 'textbook') return b.category === 'Textbook' || b.category === 'Study PDF';
     if (activeTab === 'bookmarked') return b.isBookmarked;
@@ -96,7 +97,7 @@ export default function HomePage() {
 
         {/* Books Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {filteredBooks.map((book) => (
+          {filteredBooks.map((book: Book) => (
             <BookCard key={book.id} book={book} />
           ))}
         </div>

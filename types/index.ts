@@ -67,5 +67,41 @@ export interface DailyStats {
   pagesReadToday: number;
   dailyGoal: number;
   streakDays: number;
-  completedBooksCount: number;
+  goalReachedToday?: boolean;
+  completedBooksCount?: number;
+}
+
+export interface AppState {
+  themeMode: 'dark' | 'light';
+  readerTheme: 'midnight' | 'sepia' | 'light' | 'oled';
+  toggleThemeMode: () => void;
+  setReaderTheme: (theme: 'midnight' | 'sepia' | 'light' | 'oled') => void;
+
+  isAdmin: boolean;
+  loginAdmin: () => void;
+  logoutAdmin: () => void;
+
+  books: Book[];
+  addBook: (book: Book) => void;
+  updateBook: (book: Book) => void;
+  deleteBook: (id: string) => void;
+  toggleBookmark: (id: string) => void;
+  updateBookStatus: (id: string, status: Book['status']) => void;
+
+  progressMap: Record<string, ReadingProgress>;
+  updateProgress: (bookId: string, page: number, chapter: number, pagesAdd?: number) => void;
+
+  dailyStats: DailyStats;
+  setDailyGoal: (goal: number) => void;
+  checkAndResetDailyStats: () => void;
+
+  videos: VideoResource[];
+  addVideo: (video: VideoResource) => void;
+  toggleVideoWatched: (id: string) => void;
+  updateVideoNotes: (id: string, notes: string) => void;
+  deleteVideo: (id: string) => void;
+
+  chapterNotes: ChapterNote[];
+  addChapterNote: (bookId: string, chapterNumber: number, text: string) => void;
+  deleteChapterNote: (id: string) => void;
 }

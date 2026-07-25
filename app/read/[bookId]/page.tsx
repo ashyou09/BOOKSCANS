@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
+import { Book } from '@/types';
 import { PDFReader } from '@/components/PDFReader';
 import { ChapterList } from '@/components/ChapterList';
 import { ArrowLeft, X, LayoutList } from 'lucide-react';
@@ -16,7 +17,7 @@ export default function ReaderPage() {
   const { books, progressMap, updateProgress } = useAppStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const book = books.find((b) => b.id === bookId);
+  const book = books.find((b: Book) => b.id === bookId);
   const progress = progressMap[bookId];
   const currentChapterNumber = progress?.currentChapter || 1;
 

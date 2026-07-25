@@ -20,7 +20,7 @@ import {
   Send,
   X
 } from 'lucide-react';
-import { Book, Chapter } from '@/types';
+import { Book, Chapter, ChapterNote } from '@/types';
 import { useAppStore } from '@/lib/store';
 import { getChapterForPage, getStartPageOfChapter, generateChapters } from '@/lib/chapters';
 import { getPdfData } from '@/lib/pdfStorage';
@@ -65,7 +65,7 @@ export const PDFReader: React.FC<PDFReaderProps> = ({ book, onToggleSidebar }) =
   };
 
   const currentChapterNotes = (chapterNotes || []).filter(
-    (n) => n.bookId === book.id && n.chapterNumber === currentChapterNumber
+    (n: ChapterNote) => n.bookId === book.id && n.chapterNumber === currentChapterNumber
   );
 
   const handleAddNote = () => {
@@ -149,13 +149,13 @@ export const PDFReader: React.FC<PDFReaderProps> = ({ book, onToggleSidebar }) =
 
   const handleNextPage = () => {
     if (currentPage < book.totalPages) {
-      setCurrentPage((prev) => prev + 1);
+      setCurrentPage((prev: number) => prev + 1);
     }
   };
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
-      setCurrentPage((prev) => prev - 1);
+      setCurrentPage((prev: number) => prev - 1);
     }
   };
 
@@ -468,7 +468,7 @@ export const PDFReader: React.FC<PDFReaderProps> = ({ book, onToggleSidebar }) =
                 <p className="text-[11px] text-slate-500">Write key takeaways, questions or formulas below!</p>
               </div>
             ) : (
-              currentChapterNotes.map((note) => (
+              currentChapterNotes.map((note: ChapterNote) => (
                 <div key={note.id} className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1.5 group">
                   <div className="flex items-center justify-between text-[11px]">
                     <span className="font-bold text-brand-300 flex items-center space-x-1">

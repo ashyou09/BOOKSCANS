@@ -18,6 +18,7 @@ import {
   Target
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
+import { Book } from '@/types';
 import { AdminModal } from './AdminModal';
 import { UploadModal } from './UploadModal';
 
@@ -37,7 +38,7 @@ export const Header: React.FC = () => {
   const [isUploadOpen, setIsUploadOpen] = useState(false);
 
   const filteredBooks = searchQuery.trim()
-    ? books.filter((b) =>
+    ? books.filter((b: Book) =>
         b.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         b.category.toLowerCase().includes(searchQuery.toLowerCase())
       )
@@ -209,7 +210,7 @@ export const Header: React.FC = () => {
 
             <div className="max-h-96 overflow-y-auto p-4 space-y-2">
               {filteredBooks.length > 0 ? (
-                filteredBooks.map((book) => (
+                filteredBooks.map((book: Book) => (
                   <Link
                     key={book.id}
                     href={`/read/${book.id}`}
