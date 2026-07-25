@@ -67,6 +67,7 @@ export default function ReaderPage() {
             onSelectChapter={handleSelectChapter}
             pagesPerChapter={book.pagesPerChapter}
             totalPages={book.totalPages}
+            bookTitle={book.title}
           />
         </div>
       </aside>

@@ -10,6 +10,7 @@ interface ChapterListProps {
   onSelectChapter: (chapterNumber: number) => void;
   pagesPerChapter: number;
   totalPages: number;
+  bookTitle?: string;
 }
 
 export const ChapterList: React.FC<ChapterListProps> = ({
@@ -17,17 +18,25 @@ export const ChapterList: React.FC<ChapterListProps> = ({
   currentChapterNumber,
   onSelectChapter,
   pagesPerChapter,
+  bookTitle,
 }) => {
   return (
     <div className="w-full h-full flex flex-col bg-white dark:bg-asura-card border-r border-slate-200 dark:border-asura-border">
-      <div className="p-4 border-b border-slate-200 dark:border-asura-border flex items-center justify-between">
-        <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center space-x-2">
-          <BookOpen className="w-4 h-4 text-brand-500" />
-          <span>Chapters List ({chapters.length})</span>
-        </h3>
-        <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-brand-500/10 text-brand-400">
-          {pagesPerChapter} pages/ch
-        </span>
+      <div className="p-4 border-b border-slate-200 dark:border-asura-border">
+        {bookTitle && (
+          <div className="text-xs text-slate-500 dark:text-slate-400 font-semibold mb-2 line-clamp-1" title={bookTitle}>
+            {bookTitle}
+          </div>
+        )}
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center space-x-2">
+            <BookOpen className="w-4 h-4 text-brand-500" />
+            <span>Chapters List ({chapters.length})</span>
+          </h3>
+          <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-brand-500/10 text-brand-400">
+            {pagesPerChapter} pages/ch
+          </span>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-2 space-y-1">
