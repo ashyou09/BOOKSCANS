@@ -216,10 +216,10 @@ export const PDFReader: React.FC<PDFReaderProps> = ({ book, onToggleSidebar }) =
       {/* Main Viewport Container */}
       <div className="flex-1 flex flex-col relative min-w-0 h-full overflow-hidden bg-asura-bg">
         {/* AsuraScans Top Reader Sticky Toolbar */}
-        <header className="absolute top-0 left-0 right-0 z-30 w-full bg-black/60 backdrop-blur-md border-b border-white/10 px-4 py-2.5 flex items-center justify-between">
+        <header className="absolute top-0 left-0 right-0 z-30 w-full bg-black/60 backdrop-blur-md border-b border-white/10 px-2 sm:px-4 py-2 sm:py-2.5 flex flex-wrap sm:flex-nowrap items-center justify-between gap-y-2">
         
         {/* Left Info & Chapter Toggle */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 order-1">
           {onToggleSidebar && (
             <button
               onClick={onToggleSidebar}
@@ -239,7 +239,7 @@ export const PDFReader: React.FC<PDFReaderProps> = ({ book, onToggleSidebar }) =
         </div>
 
         {/* Center Chapter Switcher */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center justify-center space-x-2 order-3 sm:order-2 w-full sm:w-auto">
           <button
             onClick={handlePrevChapter}
             disabled={currentChapterNumber <= 1}
@@ -264,7 +264,7 @@ export const PDFReader: React.FC<PDFReaderProps> = ({ book, onToggleSidebar }) =
         </div>
 
         {/* Right Reader Controls */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1 sm:space-x-2 order-2 sm:order-3">
           {isAdmin && (
             <button
               onClick={() => setIsEditOpen(true)}
@@ -341,7 +341,7 @@ export const PDFReader: React.FC<PDFReaderProps> = ({ book, onToggleSidebar }) =
       {/* Reader Viewport Engine */}
       <main
         id="pdf-scroll-container"
-        className="flex-1 overflow-y-auto w-full flex flex-col items-center pt-16 pb-16"
+        className="flex-1 overflow-y-auto w-full flex flex-col items-center pt-28 sm:pt-16 pb-20 sm:pb-16"
       >
         <div className="max-w-5xl w-full mx-auto p-4 sm:p-6 flex flex-col items-center">
         {readingMode === 'webtoon' ? (
