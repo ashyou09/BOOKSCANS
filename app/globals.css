@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-primary: #f8fafc;
+    --bg-card: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+  }
+
+  .dark {
+    --bg-primary: #0c0d14;
+    --bg-card: #121422;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border-color: #23263d;
+  }
+
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+}
+
+/* Custom Scrollbar for AsuraScans Atmosphere */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(12, 13, 20, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #23263d;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8b5cf6;
+}
+
+/* Ambient Glassmorphism */
+.glass-panel {
+  background: rgba(18, 20, 34, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.light .glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Reader Atmosphere Themes */
+.reader-midnight {
+  background-color: #0c0d14;
+  color: #f1f5f9;
+}
+
+.reader-sepia {
+  background-color: #fbf0d9;
+  color: #433422;
+}
+
+.reader-light {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+.reader-oled {
+  background-color: #000000;
+  color: #e2e8f0;
+}
