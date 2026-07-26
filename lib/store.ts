@@ -18,19 +18,36 @@ export const useAppStore = create<AppState>()(
       setReaderTheme: (readerTheme) => set({ readerTheme }),
 
       isAdmin: false, // Default: Read-Only for visitors. Log in via Admin Login to unlock editing.
-      loginAdmin: () => set({ isAdmin: true }),
-      logoutAdmin: () => set({ isAdmin: false }),
+      loginAdmin: () => {
+        set({ isAdmin: true });
+        get().syncWithDatabase();
+      },
+      logoutAdmin: () => set((state) => ({ 
+        isAdmin: false,
+        progressMap: {},
+        chapterNotes: [],
+        dailyStats: {
+          sessionDate: getTodayString(),
+          pagesReadToday: 0,
+          dailyGoal: 15,
+          streakDays: 0,
+          goalReachedToday: false,
+        },
+        books: state.books.map(b => ({ ...b, isBookmarked: false }))
+      })),
 
       books: INITIAL_BOOKS,
       addBook: (newBook) => {
         set((state) => ({
           books: [newBook, ...state.books],
         }));
-        fetch('/api/books', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newBook),
-        }).catch(() => null);
+        if (get().isAdmin) {
+          fetch('/api/books', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newBook),
+          }).catch(() => null);
+        }
       },
       updateBook: (updatedBook) =>
         set((state) => ({
@@ -45,7 +62,7 @@ export const useAppStore = create<AppState>()(
       toggleBookmark: (id) => {
         set((state) => {
           const book = state.books.find(b => b.id === id);
-          if (book) {
+          if (book && get().isAdmin) {
             fetch(`/api/books/${id}/bookmark`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
@@ -90,11 +107,13 @@ export const useAppStore = create<AppState>()(
         const currentGoal = state.dailyStats.dailyGoal;
         const goalReached = newToday >= currentGoal;
 
-        fetch(`/api/progress/${bookId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ currentPage: page, currentChapter: chapter }),
-        }).catch(() => null);
+        if (state.isAdmin) {
+          fetch(`/api/progress/${bookId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ currentPage: page, currentChapter: chapter }),
+          }).catch(() => null);
+        }
 
         set((prevState) => {
           const newMap = {
@@ -189,20 +208,25 @@ export const useAppStore = create<AppState>()(
         set((state) => ({
           chapterNotes: [newNote, ...state.chapterNotes],
         }));
-        fetch('/api/notes', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ bookId, chapterNumber, text }),
-        }).catch(() => null);
+        if (get().isAdmin) {
+          fetch('/api/notes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bookId, chapterNumber, text }),
+          }).catch(() => null);
+        }
       },
       deleteChapterNote: (id) => {
         set((state) => ({
           chapterNotes: state.chapterNotes.filter((n) => n.id !== id),
         }));
-        fetch(`/api/notes/${id}`, { method: 'DELETE' }).catch(() => null);
+        if (get().isAdmin) {
+          fetch(`/api/notes/${id}`, { method: 'DELETE' }).catch(() => null);
+        }
       },
 
       syncWithDatabase: async () => {
+        if (!get().isAdmin) return;
         try {
           const [booksRes, notesRes, progressRes] = await Promise.all([
             fetch('/api/books').catch(() => null),
