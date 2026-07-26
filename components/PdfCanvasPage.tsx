@@ -61,7 +61,9 @@ export const PdfCanvasPage: React.FC<PdfCanvasPageProps> = ({
           }
 
           const loadingTask = pdfjsLib.getDocument(
-            typeof pdfData === 'string' ? pdfData : { data: pdfData }
+            typeof pdfData === 'string'
+              ? { url: pdfData, disableAutoFetch: true, disableStream: true }
+              : { data: pdfData, disableAutoFetch: true, disableStream: true }
           );
           loadingTaskPromise = loadingTask.promise;
           globalCache.set(pdfData, loadingTaskPromise);
@@ -81,7 +83,7 @@ export const PdfCanvasPage: React.FC<PdfCanvasPageProps> = ({
 
         // Optimize memory for mobile devices
         const isMobile = window.innerWidth < 768;
-        const finalScale = isMobile ? scale * 0.7 : scale;
+        const finalScale = isMobile ? scale * 0.45 : scale;
         
         const viewport = page.getViewport({ scale: finalScale });
         canvas.height = viewport.height;

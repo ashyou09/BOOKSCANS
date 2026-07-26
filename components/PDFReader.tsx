@@ -331,7 +331,7 @@ export const PDFReader: React.FC<PDFReaderProps> = ({ book, onToggleSidebar }) =
           {/* Fullscreen Button */}
           <button
             onClick={toggleFullscreen}
-            className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition"
+            className="hidden sm:block p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition"
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
